@@ -44,6 +44,19 @@ and runs migrations automatically. You can optionally pass a port number:
 
 Omitting the argument will default to port `8000`.
 
+### Running on Windows
+
+Windows users can take advantage of the `run_windows.bat` script. It
+creates a virtual environment, installs dependencies, runs migrations
+and finally launches the development server. Pass a port number as the
+first argument to change the port:
+
+```cmd
+run_windows.bat 8080  && REM serves on port 8080
+```
+
+If omitted the server will listen on port `8000`.
+
 ### Uploading your export
 
 On the home page click **Select ZIP file** and choose the Strava export `*.zip`
