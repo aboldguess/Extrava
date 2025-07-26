@@ -1,0 +1,10 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<!-- Simple login form provided by Django's auth system -->
+<h1 class="title">Login</h1>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="button is-primary">Login</button>
+</form>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'dashboard/base.html' %}
+{% block content %}
+<h1 class="title">Upload Strava Export</h1>
+<!-- File selection and analysis controls -->
+<div class="box">
+    <input id="export-file" type="file" accept=".zip" class="file-input">
+    <button id="analyze-btn" class="button is-link mt-2">Analyze Locally</button>
+    <div id="analysis" class="mt-4"></div>
+    <button id="upload-btn" class="button is-primary mt-2" disabled>Upload Selected</button>
+</div>
+<hr>
+<h2 class="subtitle">Uploaded Activities</h2>
+<!-- List of activities already stored on the server -->
+<table class="table is-striped is-fullwidth">
+    <thead>
+    <tr><th>ID</th><th>Distance</th><th>Duration</th></tr>
+    </thead>
+    <tbody>
+    {% for act in activities %}
+        <tr><td>{{ act.activity_id }}</td><td>{{ act.distance }}</td><td>{{ act.duration }}</td></tr>
+    {% empty %}
+        <tr><td colspan="3">No activities uploaded yet.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+<script src="/static/jszip.min.js"></script>
+<script>
+// Elements used by the analysis and upload workflow
+const fileInput = document.getElementById('export-file');
+const analyzeBtn = document.getElementById('analyze-btn');
+const uploadBtn = document.getElementById('upload-btn');
+// Parsed activity data is stored here until uploaded
+let parsedData = [];
+
+// When "Analyze Locally" is clicked parse the ZIP and show checkboxes
+analyzeBtn.onclick = async function() {
+    if (!fileInput.files.length) return alert('Select a file');
+    const file = fileInput.files[0];
+    // JSZip reads the ZIP archive directly in the browser
+    const zip = await JSZip.loadAsync(file);
+    const csv = await zip.file('activities.csv').async('string');
+    const lines = csv.trim().split(/\r?\n/).slice(1); // skip header row
+    const container = document.getElementById('analysis');
+    container.innerHTML = '';
+    parsedData = lines.map(line => {
+        const [id, distance, duration] = line.split(',');
+        const row = document.createElement('div');
+        row.innerHTML = `<label class="checkbox"><input type="checkbox" checked data-id="${id}" data-distance="${distance}" data-duration="${duration}"> ${id} - ${distance} km</label>`;
+        container.appendChild(row);
+        return {id, distance, duration};
+    });
+    uploadBtn.disabled = false;
+};
+
+// Upload selected activities to the Django backend
+uploadBtn.onclick = async function() {
+    const checks = document.querySelectorAll('#analysis input[type=checkbox]');
+    const toSend = [];
+    checks.forEach(chk => {
+        if (chk.checked) {
+            toSend.push({id: chk.dataset.id, distance: chk.dataset.distance, duration: chk.dataset.duration});
+        }
+    });
+    if (!toSend.length) { alert('Nothing selected'); return; }
+    const form = new FormData();
+    form.append('entries', JSON.stringify(toSend));
+    const res = await fetch('{% url "dashboard:upload" %}', {method: 'POST', body: form, headers: {'X-CSRFToken': '{{ csrf_token }}'}});
+    if (res.ok) location.reload(); else alert('Upload failed');
+};
+</script>
+{% endblock %}
