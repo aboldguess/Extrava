@@ -1,8 +1,11 @@
 {% extends 'dashboard/base.html' %}
 {% block content %}
 <h1 class="title">Upload Strava Export</h1>
+<p class="mb-2">Choose your Strava export <code>.zip</code> file and then click
+    <strong>Analyze Locally</strong> to inspect its contents.</p>
 <!-- File selection and analysis controls -->
 <div class="box">
+    <label class="label" for="export-file">Select ZIP file</label>
     <input id="export-file" type="file" accept=".zip" class="file-input">
     <button id="analyze-btn" class="button is-link mt-2">Analyze Locally</button>
     <div id="analysis" class="mt-4"></div>
@@ -25,14 +28,15 @@
 </table>
 <script src="/static/jszip.min.js"></script>
 <script>
-// Elements used by the analysis and upload workflow
-const fileInput = document.getElementById('export-file');
-const analyzeBtn = document.getElementById('analyze-btn');
-const uploadBtn = document.getElementById('upload-btn');
-// Parsed activity data is stored here until uploaded
+// Grab references to page elements used below
+const fileInput = document.getElementById('export-file');  // file chooser
+const analyzeBtn = document.getElementById('analyze-btn'); // start analysis
+const uploadBtn = document.getElementById('upload-btn');   // upload results
+// Parsed activity data is stored here until the user uploads it
 let parsedData = [];
 
-// When "Analyze Locally" is clicked parse the ZIP and show checkboxes
+// When "Analyze Locally" is clicked parse the ZIP and display one
+// checkbox per activity found in the export
 analyzeBtn.onclick = async function() {
     if (!fileInput.files.length) return alert('Select a file');
     const file = fileInput.files[0];
@@ -64,7 +68,12 @@ uploadBtn.onclick = async function() {
     if (!toSend.length) { alert('Nothing selected'); return; }
     const form = new FormData();
     form.append('entries', JSON.stringify(toSend));
-    const res = await fetch('{% url "dashboard:upload" %}', {method: 'POST', body: form, headers: {'X-CSRFToken': '{{ csrf_token }}'}});
+    // Send the selected rows to the Django backend using Fetch
+    const res = await fetch('{% url "dashboard:upload" %}', {
+        method: 'POST',
+        body: form,
+        headers: {'X-CSRFToken': '{{ csrf_token }}'}
+    });
     if (res.ok) location.reload(); else alert('Upload failed');
 };
 </script>

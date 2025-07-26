@@ -32,6 +32,13 @@ python extrava/manage.py runserver
 
 4. Visit `http://localhost:8000` to log in and start uploading data.
 
+### Uploading your export
+
+On the home page click **Select ZIP file** and choose the Strava export `*.zip`
+you downloaded from Strava. After selecting the file press **Analyze Locally**
+to review the activities contained inside. Tick or untick each entry and finally
+click **Upload Selected** to save them on the server.
+
 ## Notes
 
 - Static files including `jszip.min.js` are served locally when `DEBUG` is true.
