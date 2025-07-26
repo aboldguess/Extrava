@@ -32,6 +32,18 @@ python extrava/manage.py runserver
 
 4. Visit `http://localhost:8000` to log in and start uploading data.
 
+### Running on Raspberry Pi
+
+Use the included `run_rpi.sh` script to spin up the development server on a
+Raspberry Pi. The script creates a virtual environment, installs dependencies
+and runs migrations automatically. You can optionally pass a port number:
+
+```bash
+./run_rpi.sh 8080  # serve on port 8080
+```
+
+Omitting the argument will default to port `8000`.
+
 ### Uploading your export
 
 On the home page click **Select ZIP file** and choose the Strava export `*.zip`
