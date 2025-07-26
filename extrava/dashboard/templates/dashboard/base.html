@@ -1,0 +1,33 @@
+<!-- Base template for all dashboard pages -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Extrava Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+<body>
+<!-- Top navigation bar -->
+<nav class="navbar is-dark">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="/">Extrava</a>
+    </div>
+    <div class="navbar-menu">
+        <div class="navbar-end">
+            {% if user.is_authenticated %}
+                <div class="navbar-item">Hello {{ user.username }}</div>
+                <a class="navbar-item" href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a class="navbar-item" href="{% url 'login' %}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+<!-- Each page injects its content below -->
+<section class="section">
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</section>
+</body>
+</html>

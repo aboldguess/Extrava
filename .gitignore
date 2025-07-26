@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+.db.sqlite3
+*.log
+
+# Virtual env
+venv/
+
+# Django staticfiles
+staticfiles/
+media/
+
+# Ignore uploaded Strava export files
+*.zip
