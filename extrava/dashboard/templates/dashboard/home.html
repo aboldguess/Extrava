@@ -43,11 +43,50 @@ analyzeBtn.onclick = async function() {
     // JSZip reads the ZIP archive directly in the browser
     const zip = await JSZip.loadAsync(file);
     const csv = await zip.file('activities.csv').async('string');
-    const lines = csv.trim().split(/\r?\n/).slice(1); // skip header row
+
+    // CSV files exported from Strava contain quoted fields with embedded commas,
+    // so splitting on commas alone will break the values.  The helper below
+    // performs a minimal parse of a single CSV line, honouring quoted fields.
+    function splitCsvLine(line) {
+        const fields = [];
+        let field = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (ch === '"') {
+                // Toggle the quoted state unless this is an escaped quote
+                if (line[i + 1] === '"') {
+                    field += '"';
+                    i++; // Skip the escaped quote
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (ch === ',' && !inQuotes) {
+                fields.push(field);
+                field = '';
+            } else {
+                field += ch;
+            }
+        }
+        fields.push(field);
+        return fields;
+    }
+
+    // Determine which CSV columns hold the data we care about by inspecting the
+    // header row. This ensures the parsing still works if column positions ever
+    // change in future exports.
+    const lines = csv.trim().split(/\r?\n/);
+    const header = splitCsvLine(lines[0]);
+    const idIdx = header.indexOf('Activity ID');
+    const distIdx = header.indexOf('Distance');
+    const durIdx = header.indexOf('Elapsed Time');
     const container = document.getElementById('analysis');
     container.innerHTML = '';
-    parsedData = lines.map(line => {
-        const [id, distance, duration] = line.split(',');
+    parsedData = lines.slice(1).map(line => {
+        const cols = splitCsvLine(line);
+        const id = cols[idIdx];
+        const distance = cols[distIdx];
+        const duration = cols[durIdx];
         const row = document.createElement('div');
         row.innerHTML = `<label class="checkbox"><input type="checkbox" checked data-id="${id}" data-distance="${distance}" data-duration="${duration}"> ${id} - ${distance} km</label>`;
         container.appendChild(row);

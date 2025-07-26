@@ -37,11 +37,15 @@ def upload_data(request):
 
     # Persist each uploaded activity for later analysis
     for row in data:
-        Activity.objects.create(
-            user=request.user,
-            activity_id=row.get("id", ""),
-            distance=float(row.get("distance", 0)),
-            duration=int(row.get("duration", 0)),
-        )
+        try:
+            Activity.objects.create(
+                user=request.user,
+                activity_id=row.get("id", ""),
+                distance=float(row.get("distance", 0)),
+                duration=int(row.get("duration", 0)),
+            )
+        except (TypeError, ValueError) as exc:
+            # If any row cannot be parsed, inform the client so they can fix the data
+            return JsonResponse({"error": str(exc)}, status=400)
 
     return JsonResponse({"status": "ok"})
