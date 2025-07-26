@@ -1,0 +1,3 @@
+# Python dependencies for Extrava project
+# Django is the only required package for running this site
+Django>=5.2
