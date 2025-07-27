@@ -34,12 +34,17 @@ python extrava/manage.py runserver
 
 ### Running on Raspberry Pi
 
-Use the included `run_rpi.sh` script to spin up the development server on a
+Use the included `rpi_extrava.sh` script to spin up the server on a
 Raspberry Pi. The script creates a virtual environment, installs dependencies
-and runs migrations automatically. You can optionally pass a port number:
+and runs migrations automatically. Pass `--prod` to run a Gunicorn based
+production server or omit it for the default development server. You can also
+provide an optional port number:
 
 ```bash
-./run_rpi.sh 8080  # serve on port 8080
+# Development server on the default port
+./rpi_extrava.sh
+# Production server on port 8080
+./rpi_extrava.sh --prod 8080
 ```
 
 Omitting the argument will default to port `8000`.
